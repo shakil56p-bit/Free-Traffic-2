@@ -23,20 +23,20 @@
 
     <div id="auth-section" class="container">
         <h1 class="neon-text">Free Traffic</h1>
-        <p>  </p>
+        <p>নিরাপদ আর্নিং প্ল্যাটফর্ম</p>
         <div id="login-form">
-            <h3 style="color: #00d4ff;"> </h3>
-            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="loginEmail" placeholder=" "></div>
-            <div class="input-group"><i class="fas fa-key"></i><input type="password" id="loginPass" placeholder=""></div>
-            <button onclick="handleLogin()" class="btn-primary"></button>
-            <p class="mt-2"> ? <span onclick="toggleAuth('register')" style="color: #d000ff; cursor: pointer;">  </span></p>
+            <h3 style="color: #00d4ff;">লগইন করুন</h3>
+            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="loginEmail" placeholder="ইমেইল আইডি"></div>
+            <div class="input-group"><i class="fas fa-key"></i><input type="password" id="loginPass" placeholder="পাসওয়ার্ড"></div>
+            <button onclick="handleLogin()" class="btn-primary">লগইন</button>
+            <p class="mt-2">অ্যাকাউন্ট নেই? <span onclick="toggleAuth('register')" style="color: #d000ff; cursor: pointer;">নতুন আইডি খুলুন</span></p>
         </div>
         <div id="register-form" class="hidden">
-            <h3 style="color: #d000ff;">  </h3>
-            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="regEmail" placeholder=" "></div>
-            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="regPass" placeholder=" "></div>
-            <button onclick="handleRegister()" class="btn-primary"> </button>
-            <p class="mt-2">  ? <span onclick="toggleAuth('login')" style="color: #00d4ff; cursor: pointer;"> </span></p>
+            <h3 style="color: #d000ff;">নতুন একাউন্ট খুলুন</h3>
+            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="regEmail" placeholder="আপনার ইমেইল"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="regPass" placeholder="নতুন পাসওয়ার্ড"></div>
+            <button onclick="handleRegister()" class="btn-primary">সাইন আপ</button>
+            <p class="mt-2">আগেই একাউন্ট আছে? <span onclick="toggleAuth('login')" style="color: #00d4ff; cursor: pointer;">লগইন করুন</span></p>
         </div>
     </div>
 
@@ -45,18 +45,18 @@
             <div class="profile-pic"><i class="fas fa-user-astronaut"></i></div>
             <div class="user-info">
                 <h3 id="user-name">User</h3>
-                <span class="status-dot"></span> 
-                <div class="balance-badge"> <span id="user-balance">0.00</span></div>
+                <span class="status-dot"></span> অনলাইন
+                <div class="balance-badge">🪙 <span id="user-balance">0.00</span></div>
             </div>
         </div>
-        <h3 class="section-title"> </h3>
+        <h3 class="section-title">কমান্ড সেন্টার</h3>
         <div class="grid-menu">
-            <div class="card" onclick="openSection('exchange')"><i class="fas fa-exchange-alt color-cyan"></i><p></p></div>
-            <div class="card" onclick="openSection('myads')"><i class="fas fa-bullhorn color-purple"></i><p> </p></div>
-            <div class="card" onclick="openSection('profile')"><i class="fas fa-user color-red"></i><p></p></div>
-            <div class="card" onclick="claimDailyBonus()"><i class="fas fa-gift color-yellow"></i><p> </p></div>
-            <div class="card" onclick="openSection('sendmoney')"><i class="fas fa-paper-plane color-green"></i><p> </p></div>
-            <div class="card" onclick="Swal.fire('Info', 'Admin Contact: admin@freetraffic.com', 'info')"><i class="fas fa-headset color-blue"></i><p></p></div>
+            <div class="card" onclick="openSection('exchange')"><i class="fas fa-exchange-alt color-cyan"></i><p>এক্সচেঞ্জ</p></div>
+            <div class="card" onclick="openSection('myads')"><i class="fas fa-bullhorn color-purple"></i><p>আমার বিজ্ঞাপন</p></div>
+            <div class="card" onclick="openSection('profile')"><i class="fas fa-user color-red"></i><p>প্রোফাইল</p></div>
+            <div class="card" onclick="claimDailyBonus()"><i class="fas fa-gift color-yellow"></i><p>ডেইলি বোনাস</p></div>
+            <div class="card" onclick="openSection('sendmoney')"><i class="fas fa-paper-plane color-green"></i><p>সেন্ড মানি</p></div>
+            <div class="card" onclick="Swal.fire('Info', 'Admin Contact: admin@freetraffic.com', 'info')"><i class="fas fa-headset color-blue"></i><p>সাপোর্ট</p></div>
         </div>
         <div id="content-area" class="content-box hidden">
             <button onclick="closeContent()" class="close-btn">X</button>
@@ -69,7 +69,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        //   Firebase Config 
+        // ⚠️ আপনার Firebase Config নিচে বসান ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyDjQ0LB1J1MeAFyPOdA9sCkYiPYaT4rXEg",
             authDomain: "free-traffic-b363b.firebaseapp.com",
@@ -102,7 +102,7 @@
 
         async function handleRegister() {
             const email = document.getElementById('regEmail').value, pass = document.getElementById('regPass').value;
-            if (!email || !pass) return Swal.fire('Error', ' ', 'error');
+            if (!email || !pass) return Swal.fire('Error', 'তথ্য দিন', 'error');
             Swal.showLoading();
             const ip = await getIP();
             if (!ip) return Swal.fire('Error', 'IP Error', 'error');
@@ -194,15 +194,14 @@
         }
 
         function startTask(taskId, url, duration, reward) {
-            window.open(url, '_blank'); // Link Opens
+            window.open(url, '_blank'); 
             
-            // Timer Calculation
             const endTime = Date.now() + (duration * 1000);
             let timerInterval;
 
             Swal.fire({
-                title: ' !',
-                html: ` : <b id="timer-display">${duration}</b> `,
+                title: 'অপেক্ষা করুন!',
+                html: `বাকি সময়: <b id="timer-display">${duration}</b> সেকেন্ড`,
                 allowOutsideClick: false,
                 showConfirmButton: false,
                 didOpen: () => {
@@ -217,7 +216,7 @@
                         if (distance < 0) {
                             clearInterval(timerInterval);
                             Swal.close();
-                            addBalance(taskId, reward); // Add Balance
+                            addBalance(taskId, reward); 
                         }
                     }, 1000);
                 },
@@ -240,7 +239,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Success!',
-                        text: `${reward}   !`,
+                        text: `${reward} কয়েন যুক্ত হয়েছে!`,
                         timer: 2000
                     });
                 });
