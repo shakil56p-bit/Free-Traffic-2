@@ -156,7 +156,7 @@
         }
         function closeContent() { document.getElementById('content-area').classList.add('hidden'); }
 
-        // --- 1. EXCHANGE & TASK LOGIC ---
+        // --- 1. EXCHANGE & TASK LOGIC (TIMER FIX) ---
         function loadExchange(c) {
             c.innerHTML = `
                 <h3 class="neon-text">Traffic Exchange</h3>
@@ -193,9 +193,12 @@
             });
         }
 
+        //  MOST IMPORTANT FIX: BACKGROUND TIMER 
         function startTask(taskId, url, duration, reward) {
-            window.open(url, '_blank'); 
-            
+            // .     (  )
+            window.open(url, '_blank');
+
+            // .      ( )
             const endTime = Date.now() + (duration * 1000);
             let timerInterval;
 
@@ -215,8 +218,8 @@
 
                         if (distance < 0) {
                             clearInterval(timerInterval);
-                            Swal.close();
-                            addBalance(taskId, reward); 
+                            Swal.close(); //  
+                            addBalance(taskId, reward); //  
                         }
                     }, 1000);
                 },
@@ -226,27 +229,36 @@
             });
         }
 
+        //  BALANCE FIX 
         function addBalance(taskId, reward) {
+            //    (Transaction    Set       )
             const userRef = db.ref('users/' + currentUser.uid);
+            
             userRef.once('value', snapshot => {
                 const currentBal = parseFloat(snapshot.val().balance) || 0;
                 const newBal = currentBal + parseFloat(reward);
 
+                //  
                 userRef.update({ balance: newBal }).then(() => {
+                    
+                    //  
                     const taskRef = db.ref('tasks/' + taskId + '/remaining');
                     taskRef.transaction(rem => (rem > 0 ? rem - 1 : 0));
                     
                     Swal.fire({
                         icon: 'success',
-                        title: 'Success!',
+                        title: '!',
                         text: `${reward}   !`,
                         timer: 2000
                     });
+
+                }).catch(e => {
+                    Swal.fire('Error', '  : ' + e.message, 'error');
                 });
             });
         }
 
-        // --- 2. MY ADS ---
+        // --- 2. MY ADS (With Progress) ---
         function loadMyAds(c) {
             c.innerHTML = `
                 <h3>Post Ad</h3>
