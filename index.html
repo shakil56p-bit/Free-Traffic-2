@@ -3,20 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Traffic - Secure Login</title>
+    <title>Free Traffic - Secure Panel</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
+        /*       */
+        body { margin: 0; padding: 0; font-family: 'Orbitron', sans-serif; background: #000; color: white; }
         .cat-btn-group { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 5px; }
-        .cat-btn { background: #111; border: 1px solid #00d4ff; color: white; padding: 8px 5px; border-radius: 5px; font-size: 12px; flex: 1; cursor: pointer; }
+        .cat-btn { background: #111; border: 1px solid #00d4ff; color: white; padding: 8px 5px; border-radius: 5px; font-size: 12px; flex: 1; cursor: pointer; transition: 0.3s; }
         .cat-active { background: #00d4ff; color: black; font-weight: bold; }
-        .history-card, .task-card { background: #0d1b2a; border: 1px solid #333; padding: 10px; margin-top: 10px; border-radius: 8px; text-align: left; font-size: 13px; position: relative; }
-        .task-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #00d4ff; }
-        .progress-text { float: right; color: #00ff88; font-weight: bold; }
-        .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-bottom: 5px; }
-        .status-running { background: #00d4ff; color: black; }
-        .status-completed { background: #555; color: #aaa; }
+        .task-card { 
+            background: #0d1b2a; 
+            border: 1px solid #00d4ff; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 0 5px rgba(0, 212, 255, 0.2);
+        }
+        .history-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .status-done { background: #333; color: #888; }
+        .status-active { background: green; color: white; }
+        .progress-text { float: right; color: #00d4ff; }
     </style>
 </head>
 <body>
@@ -24,6 +44,7 @@
     <div id="auth-section" class="container">
         <h1 class="neon-text">Free Traffic</h1>
         <p>  </p>
+        
         <div id="login-form">
             <h3 style="color: #00d4ff;"> </h3>
             <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="loginEmail" placeholder=" "></div>
@@ -31,6 +52,7 @@
             <button onclick="handleLogin()" class="btn-primary"></button>
             <p class="mt-2"> ? <span onclick="toggleAuth('register')" style="color: #d000ff; cursor: pointer;">  </span></p>
         </div>
+
         <div id="register-form" class="hidden">
             <h3 style="color: #d000ff;">  </h3>
             <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="regEmail" placeholder=" "></div>
@@ -49,6 +71,7 @@
                 <div class="balance-badge"> <span id="user-balance">0.00</span></div>
             </div>
         </div>
+
         <h3 class="section-title"> </h3>
         <div class="grid-menu">
             <div class="card" onclick="openSection('exchange')"><i class="fas fa-exchange-alt color-cyan"></i><p></p></div>
@@ -58,6 +81,7 @@
             <div class="card" onclick="openSection('sendmoney')"><i class="fas fa-paper-plane color-green"></i><p> </p></div>
             <div class="card" onclick="Swal.fire('Info', 'Admin Contact: admin@freetraffic.com', 'info')"><i class="fas fa-headset color-blue"></i><p></p></div>
         </div>
+
         <div id="content-area" class="content-box hidden">
             <button onclick="closeContent()" class="close-btn">X</button>
             <div id="dynamic-body"></div>
@@ -145,7 +169,7 @@
             }
         });
 
-        // --- CORE FUNCTIONS ---
+        // --- NAVIGATION ---
         function openSection(s) {
             document.getElementById('content-area').classList.remove('hidden');
             const b = document.getElementById('dynamic-body');
@@ -156,7 +180,7 @@
         }
         function closeContent() { document.getElementById('content-area').classList.add('hidden'); }
 
-        // --- 1. EXCHANGE & TASK LOGIC (TIMER FIX) ---
+        // --- 1. EXCHANGE (FIXED: ONE VIEW PER USER) ---
         function loadExchange(c) {
             c.innerHTML = `
                 <h3 class="neon-text">Traffic Exchange</h3>
@@ -180,25 +204,31 @@
                 snap.forEach(child => {
                     const t = child.val();
                     const rem = Number(t.remaining);
-                    if(rem > 0 && t.owner !== currentUser.uid && (t.type || 'Direct Link') === cat) {
+                    const taskId = child.key;
+                    
+                    // :      ?
+                    const viewedBy = t.viewedBy || {};
+                    const hasViewed = viewedBy.hasOwnProperty(currentUser.uid);
+
+                    // :  > 0,   ,      
+                    if(rem > 0 && t.owner !== currentUser.uid && (t.type || 'Direct Link') === cat && !hasViewed) {
                         const rew = Number(t.duration) / 10;
                         html += `
                         <div class="task-card">
                             <div><h4 style="margin:0;color:#00d4ff">TASK</h4><small>${t.duration}s | Pay: ${rew}</small></div>
-                            <button onclick="startTask('${child.key}', '${t.url}', ${t.duration}, ${rew})" class="btn-primary" style="width:auto;padding:5px 15px">View</button>
+                            <button onclick="startTask('${taskId}', '${t.url}', ${t.duration}, ${rew})" class="btn-primary" style="width:auto;padding:5px 15px">View</button>
                         </div>`;
                     }
                 });
-                list.innerHTML = html || '<p style="text-align:center;color:red">No tasks available.</p>';
+                list.innerHTML = html || '<p style="text-align:center;color:red">No tasks available for you.</p>';
             });
         }
 
-        //  MOST IMPORTANT FIX: BACKGROUND TIMER 
         function startTask(taskId, url, duration, reward) {
-            // .     (  )
-            window.open(url, '_blank');
-
-            // .      ( )
+            // .   (-  )
+            window.open(url, '_blank'); 
+            
+            // .  
             const endTime = Date.now() + (duration * 1000);
             let timerInterval;
 
@@ -218,47 +248,41 @@
 
                         if (distance < 0) {
                             clearInterval(timerInterval);
-                            Swal.close(); //  
-                            addBalance(taskId, reward); //  
+                            Swal.close();
+                            completeTask(taskId, reward); //  
                         }
                     }, 1000);
                 },
-                willClose: () => {
-                    clearInterval(timerInterval);
-                }
+                willClose: () => clearInterval(timerInterval)
             });
         }
 
-        //  BALANCE FIX 
-        function addBalance(taskId, reward) {
-            //    (Transaction    Set       )
+        function completeTask(taskId, reward) {
             const userRef = db.ref('users/' + currentUser.uid);
-            
             userRef.once('value', snapshot => {
                 const currentBal = parseFloat(snapshot.val().balance) || 0;
                 const newBal = currentBal + parseFloat(reward);
 
-                //  
+                // .  
                 userRef.update({ balance: newBal }).then(() => {
                     
-                    //  
-                    const taskRef = db.ref('tasks/' + taskId + '/remaining');
-                    taskRef.transaction(rem => (rem > 0 ? rem - 1 : 0));
+                    // .      ""   
+                    const taskRef = db.ref('tasks/' + taskId);
+                    taskRef.child('remaining').transaction(rem => (rem > 0 ? rem - 1 : 0));
+                    taskRef.child('viewedBy').child(currentUser.uid).set(true);
                     
                     Swal.fire({
                         icon: 'success',
                         title: '!',
                         text: `${reward}   !`,
-                        timer: 2000
+                        timer: 2000,
+                        showConfirmButton: false
                     });
-
-                }).catch(e => {
-                    Swal.fire('Error', '  : ' + e.message, 'error');
                 });
             });
         }
 
-        // --- 2. MY ADS (With Progress) ---
+        // --- 2. MY ADS (With History) ---
         function loadMyAds(c) {
             c.innerHTML = `
                 <h3>Post Ad</h3>
@@ -290,7 +314,7 @@
                     const isDone = rem <= 0;
                     html += `
                     <div class="history-card">
-                        <span class="status-badge ${isDone?'status-completed':'status-running'}">${isDone?'DONE':'ACTIVE'}</span>
+                        <span class="status-badge ${isDone?'status-done':'status-active'}">${isDone?'DONE':'RUNNING'}</span>
                         <span class="progress-text">Views: ${done}/${init}</span>
                         <div style="margin-top:5px;color:#00d4ff;overflow:hidden;text-overflow:ellipsis"><i class="fas fa-link"></i> ${t.url}</div>
                     </div>`;
@@ -316,7 +340,8 @@
                 if(bal >= cost) {
                     db.ref('users/' + currentUser.uid + '/balance').set(bal - cost);
                     db.ref('tasks').push({
-                        owner: currentUser.uid, url, duration: time, remaining: target, initialTarget: target, type
+                        owner: currentUser.uid, url, duration: time, remaining: target, initialTarget: target, type,
+                        viewedBy: {} //   
                     });
                     Swal.fire('Success', 'Ad Published!', 'success');
                 } else Swal.fire('Error', 'Low Balance', 'error');
