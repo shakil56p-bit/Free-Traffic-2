@@ -156,7 +156,7 @@
         }
         function closeContent() { document.getElementById('content-area').classList.add('hidden'); }
 
-        // --- 1. EXCHANGE & TASK LOGIC (UPDATED: VIEW ONCE) ---
+        // --- 1. EXCHANGE & TASK LOGIC ---
         function loadExchange(c) {
             c.innerHTML = `
                 <h3 class="neon-text">Traffic Exchange</h3>
@@ -182,7 +182,7 @@
                     const rem = Number(t.remaining);
                     const taskId = child.key;
                     
-                    //  CHECK IF USER ALREADY VIEWED 
+                    //       
                     const viewedBy = t.viewedBy || {}; 
                     const alreadySeen = viewedBy.hasOwnProperty(currentUser.uid);
 
@@ -239,11 +239,10 @@
                 const newBal = currentBal + parseFloat(reward);
 
                 userRef.update({ balance: newBal }).then(() => {
-                    // .   
                     const taskRef = db.ref('tasks/' + taskId);
                     taskRef.child('remaining').transaction(rem => (rem > 0 ? rem - 1 : 0));
                     
-                    // .  "Viewed"    (   )
+                    //      
                     taskRef.child('viewedBy').child(currentUser.uid).set(true);
                     
                     Swal.fire({
