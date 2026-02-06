@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<script src="https://pl28658462.effectivegatecpm.com/2f/24/08/2f240881ef041771d5c15e476c4b9b0f.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Traffic - Secure Login</title>
+    
+    <script src="https://pl28658462.effectivegatecpm.com/2f/24/08/2f240881ef041771d5c15e476c4b9b0f.js"></script>
+    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -157,7 +159,7 @@
         }
         function closeContent() { document.getElementById('content-area').classList.add('hidden'); }
 
-        // --- 1. EXCHANGE & TASK LOGIC (TIMER FIX) ---
+        // --- 1. EXCHANGE & TASK LOGIC ---
         function loadExchange(c) {
             c.innerHTML = `
                 <h3 class="neon-text">Traffic Exchange</h3>
@@ -194,12 +196,10 @@
             });
         }
 
-        //  MOST IMPORTANT FIX: BACKGROUND TIMER 
         function startTask(taskId, url, duration, reward) {
-            // .     (  )
-            window.open(url, '_blank');
-
-            // .      ( )
+            window.open(url, '_blank'); // Link Opens
+            
+            // Timer Calculation
             const endTime = Date.now() + (duration * 1000);
             let timerInterval;
 
@@ -219,8 +219,8 @@
 
                         if (distance < 0) {
                             clearInterval(timerInterval);
-                            Swal.close(); //  
-                            addBalance(taskId, reward); //  
+                            Swal.close();
+                            addBalance(taskId, reward); // Add Balance
                         }
                     }, 1000);
                 },
@@ -230,36 +230,27 @@
             });
         }
 
-        //  BALANCE FIX 
         function addBalance(taskId, reward) {
-            //    (Transaction    Set       )
             const userRef = db.ref('users/' + currentUser.uid);
-            
             userRef.once('value', snapshot => {
                 const currentBal = parseFloat(snapshot.val().balance) || 0;
                 const newBal = currentBal + parseFloat(reward);
 
-                //  
                 userRef.update({ balance: newBal }).then(() => {
-                    
-                    //  
                     const taskRef = db.ref('tasks/' + taskId + '/remaining');
                     taskRef.transaction(rem => (rem > 0 ? rem - 1 : 0));
                     
                     Swal.fire({
                         icon: 'success',
-                        title: '!',
+                        title: 'Success!',
                         text: `${reward}   !`,
                         timer: 2000
                     });
-
-                }).catch(e => {
-                    Swal.fire('Error', '  : ' + e.message, 'error');
                 });
             });
         }
 
-        // --- 2. MY ADS (With Progress) ---
+        // --- 2. MY ADS ---
         function loadMyAds(c) {
             c.innerHTML = `
                 <h3>Post Ad</h3>
@@ -355,6 +346,5 @@
             });
         }
     </script>
-<script src="https://pl28658531.effectivegatecpm.com/31/f8/ce/31f8ce02df3c8b7bb27baf94aa9b986f.js"></script>
 </body>
 </html>
