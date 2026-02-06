@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<script src="https://pl28658462.effectivegatecpm.com/2f/24/08/2f240881ef041771d5c15e476c4b9b0f.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Traffic - Secure Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .cat-btn-group { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 5px; }
+        .cat-btn { background: #111; border: 1px solid #00d4ff; color: white; padding: 8px 5px; border-radius: 5px; font-size: 12px; flex: 1; cursor: pointer; }
+        .cat-active { background: #00d4ff; color: black; font-weight: bold; }
+        .history-card, .task-card { background: #0d1b2a; border: 1px solid #333; padding: 10px; margin-top: 10px; border-radius: 8px; text-align: left; font-size: 13px; position: relative; }
+        .task-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #00d4ff; }
+        .progress-text { float: right; color: #00ff88; font-weight: bold; }
+        .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-bottom: 5px; }
+        .status-running { background: #00d4ff; color: black; }
+        .status-completed { background: #555; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-section" class="container">
+        <h1 class="neon-text">Free Traffic</h1>
+        <p>নিরাপদ আর্নিং প্ল্যাটফর্ম</p>
+        <div id="login-form">
+            <h3 style="color: #00d4ff;">লগইন করুন</h3>
+            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="loginEmail" placeholder="ইমেইল আইডি"></div>
+            <div class="input-group"><i class="fas fa-key"></i><input type="password" id="loginPass" placeholder="পাসওয়ার্ড"></div>
+            <button onclick="handleLogin()" class="btn-primary">লগইন</button>
+            <p class="mt-2">অ্যাকাউন্ট নেই? <span onclick="toggleAuth('register')" style="color: #d000ff; cursor: pointer;">নতুন আইডি খুলুন</span></p>
+        </div>
+        <div id="register-form" class="hidden">
+            <h3 style="color: #d000ff;">নতুন একাউন্ট খুলুন</h3>
+            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="regEmail" placeholder="আপনার ইমেইল"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="regPass" placeholder="নতুন পাসওয়ার্ড"></div>
+            <button onclick="handleRegister()" class="btn-primary">সাইন আপ</button>
+            <p class="mt-2">আগেই একাউন্ট আছে? <span onclick="toggleAuth('login')" style="color: #00d4ff; cursor: pointer;">লগইন করুন</span></p>
+        </div>
+    </div>
+
+    <div id="dashboard-section" class="container hidden">
+        <div class="header">
+            <div class="profile-pic"><i class="fas fa-user-astronaut"></i></div>
+            <div class="user-info">
+                <h3 id="user-name">User</h3>
+                <span class="status-dot"></span> অনলাইন
+                <div class="balance-badge">🪙 <span id="user-balance">0.00</span></div>
+            </div>
+        </div>
+        <h3 class="section-title">কমান্ড সেন্টার</h3>
+        <div class="grid-menu">
+            <div class="card" onclick="openSection('exchange')"><i class="fas fa-exchange-alt color-cyan"></i><p>এক্সচেঞ্জ</p></div>
+            <div class="card" onclick="openSection('myads')"><i class="fas fa-bullhorn color-purple"></i><p>আমার বিজ্ঞাপন</p></div>
+            <div class="card" onclick="openSection('profile')"><i class="fas fa-user color-red"></i><p>প্রোফাইল</p></div>
+            <div class="card" onclick="claimDailyBonus()"><i class="fas fa-gift color-yellow"></i><p>ডেইলি বোনাস</p></div>
+            <div class="card" onclick="openSection('sendmoney')"><i class="fas fa-paper-plane color-green"></i><p>সেন্ড মানি</p></div>
+            <div class="card" onclick="Swal.fire('Info', 'Admin Contact: admin@freetraffic.com', 'info')"><i class="fas fa-headset color-blue"></i><p>সাপোর্ট</p></div>
+        </div>
+        <div id="content-area" class="content-box hidden">
+            <button onclick="closeContent()" class="close-btn">X</button>
+            <div id="dynamic-body"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // ⚠️ আপনার Firebase Config নিচে বসান ⚠️
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjQ0LB1J1MeAFyPOdA9sCkYiPYaT4rXEg",
+            authDomain: "free-traffic-b363b.firebaseapp.com",
+            databaseURL: "https://free-traffic-b363b-default-rtdb.firebaseio.com",
+            projectId: "free-traffic-b363b",
+            storageBucket: "free-traffic-b363b.firebasestorage.app",
+            messagingSenderId: "800542824235",
+            appId: "1:800542824235:web:8283a6df589af8651cd76e",
+            measurementId: "G-LMVTZKVNJZ"
+        };
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let currentUser = null;
+
+        // --- AUTH SYSTEM ---
+        async function getIP() {
+            try {
+               const r = await fetch('https://api.ipify.org?format=json');
+               const d = await r.json();
+               return d.ip.replace(/\./g, '_');
+            } catch (e) { return null; }
+        }
+
+        function toggleAuth(view) {
+            document.getElementById(view === 'register' ? 'login-form' : 'register-form').classList.add('hidden');
+            document.getElementById(view === 'register' ? 'register-form' : 'login-form').classList.remove('hidden');
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('regEmail').value, pass = document.getElementById('regPass').value;
+            if (!email || !pass) return Swal.fire('Error', 'তথ্য দিন', 'error');
+            Swal.showLoading();
+            const ip = await getIP();
+            if (!ip) return Swal.fire('Error', 'IP Error', 'error');
+
+            db.ref('ips/' + ip).once('value', s => {
+                if (s.exists()) Swal.fire('Error', 'Already registered', 'error');
+                else {
+                    auth.createUserWithEmailAndPassword(email, pass).then(c => {
+                        db.ref('users/' + c.user.uid).set({ email, balance: 0, uid: c.user.uid, ip, lastBonus: 0 });
+                        db.ref('ips/' + ip).set(c.user.uid);
+                        Swal.fire('Success', 'Account Created!', 'success');
+                    }).catch(e => Swal.fire('Error', e.message, 'error'));
+                }
+            });
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value, pass = document.getElementById('loginPass').value;
+            auth.signInWithEmailAndPassword(email, pass)
+                .then(() => Swal.fire('Success', 'Logged In!', 'success'))
+                .catch(() => Swal.fire('Error', 'Invalid credentials', 'error'));
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                db.ref('users/' + user.uid).on('value', s => {
+                    const d = s.val();
+                    if(d) {
+                        const b = d.balance === undefined ? 0 : Number(d.balance);
+                        document.getElementById('user-balance').innerText = b.toFixed(2);
+                        document.getElementById('user-name').innerText = d.email.split('@')[0];
+                    }
+                });
+            } else {
+                document.getElementById('auth-section').style.display = 'block';
+                document.getElementById('dashboard-section').classList.add('hidden');
+            }
+        });
+
+        // --- CORE FUNCTIONS ---
+        function openSection(s) {
+            document.getElementById('content-area').classList.remove('hidden');
+            const b = document.getElementById('dynamic-body');
+            if(s === 'exchange') loadExchange(b);
+            else if(s === 'myads') loadMyAds(b);
+            else if(s === 'sendmoney') loadSendMoney(b);
+            else if(s === 'profile') b.innerHTML = `<h3 class="neon-text">Profile</h3><p>${currentUser.email}</p><button onclick="auth.signOut()" class="btn-primary" style="background:red">Logout</button>`;
+        }
+        function closeContent() { document.getElementById('content-area').classList.add('hidden'); }
+
+        // --- 1. EXCHANGE & TASK LOGIC (TIMER FIX) ---
+        function loadExchange(c) {
+            c.innerHTML = `
+                <h3 class="neon-text">Traffic Exchange</h3>
+                <div class="cat-btn-group">
+                    <button class="cat-btn cat-active" onclick="filterTasks('Direct Link', this)">Direct</button>
+                    <button class="cat-btn" onclick="filterTasks('Website', this)">Web</button>
+                    <button class="cat-btn" onclick="filterTasks('Ad Script', this)">Script</button>
+                </div>
+                <div id="taskList">Checking...</div>
+            `;
+            filterTasks('Direct Link', document.querySelector('.cat-btn'));
+        }
+
+        function filterTasks(cat, el) {
+            if(el) { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('cat-active')); el.classList.add('cat-active'); }
+            const list = document.getElementById('taskList');
+            list.innerHTML = '<p style="text-align:center">Loading...</p>';
+
+            db.ref('tasks').on('value', snap => {
+                let html = '';
+                snap.forEach(child => {
+                    const t = child.val();
+                    const rem = Number(t.remaining);
+                    if(rem > 0 && t.owner !== currentUser.uid && (t.type || 'Direct Link') === cat) {
+                        const rew = Number(t.duration) / 10;
+                        html += `
+                        <div class="task-card">
+                            <div><h4 style="margin:0;color:#00d4ff">TASK</h4><small>${t.duration}s | Pay: ${rew}</small></div>
+                            <button onclick="startTask('${child.key}', '${t.url}', ${t.duration}, ${rew})" class="btn-primary" style="width:auto;padding:5px 15px">View</button>
+                        </div>`;
+                    }
+                });
+                list.innerHTML = html || '<p style="text-align:center;color:red">No tasks available.</p>';
+            });
+        }
+
+        // 🔥🔥🔥 MOST IMPORTANT FIX: BACKGROUND TIMER 🔥🔥🔥
+        function startTask(taskId, url, duration, reward) {
+            // ১. আগেই উইন্ডো ওপেন করুন (পপআপ ব্লকার এড়াতে)
+            window.open(url, '_blank');
+
+            // ২. রিয়েলটাইম ডেট ব্যবহার করে টাইমার (ব্যাকগ্রাউন্ডেও চলবে)
+            const endTime = Date.now() + (duration * 1000);
+            let timerInterval;
+
+            Swal.fire({
+                title: 'অপেক্ষা করুন!',
+                html: `বাকি সময়: <b id="timer-display">${duration}</b> সেকেন্ড`,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    timerInterval = setInterval(() => {
+                        const now = Date.now();
+                        const distance = endTime - now;
+                        const seconds = Math.ceil(distance / 1000);
+
+                        const display = document.getElementById('timer-display');
+                        if(display) display.innerText = seconds > 0 ? seconds : 0;
+
+                        if (distance < 0) {
+                            clearInterval(timerInterval);
+                            Swal.close(); // অ্যালার্ট বন্ধ
+                            addBalance(taskId, reward); // কয়েন যুক্ত
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            });
+        }
+
+        // 🔥🔥🔥 BALANCE FIX 🔥🔥🔥
+        function addBalance(taskId, reward) {
+            // সরাসরি ডাটাবেস আপডেট (Transaction বাদ দিয়ে সরাসরি Set ব্যবহার করা হলো যাতে এরর না খায়)
+            const userRef = db.ref('users/' + currentUser.uid);
+            
+            userRef.once('value', snapshot => {
+                const currentBal = parseFloat(snapshot.val().balance) || 0;
+                const newBal = currentBal + parseFloat(reward);
+
+                // ব্যালেন্স সেট
+                userRef.update({ balance: newBal }).then(() => {
+                    
+                    // টাস্ক কমানো
+                    const taskRef = db.ref('tasks/' + taskId + '/remaining');
+                    taskRef.transaction(rem => (rem > 0 ? rem - 1 : 0));
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'অভিনন্দন!',
+                        text: `${reward} কয়েন যুক্ত হয়েছে!`,
+                        timer: 2000
+                    });
+
+                }).catch(e => {
+                    Swal.fire('Error', 'ব্যালেন্স আপডেট হয়নি: ' + e.message, 'error');
+                });
+            });
+        }
+
+        // --- 2. MY ADS (With Progress) ---
+        function loadMyAds(c) {
+            c.innerHTML = `
+                <h3>Post Ad</h3>
+                <input type="text" id="adUrl" placeholder="https://" class="input-full">
+                <select id="adTime" class="input-full" onchange="calcCost()">
+                    <option value="10">10s (1 Coin)</option><option value="20">20s (2 Coin)</option>
+                    <option value="30">30s (3 Coin)</option><option value="60">60s (6 Coin)</option>
+                </select>
+                <select id="adType" class="input-full">
+                    <option value="Direct Link">Direct Link</option><option value="Website">Website</option><option value="Ad Script">Script</option>
+                </select>
+                <input type="number" id="adTarget" placeholder="Target Views" class="input-full" onkeyup="calcCost()">
+                <p id="costDisplay" style="color:yellow;text-align:center">Cost: 0.00</p>
+                <button onclick="postAd()" class="btn-primary">Publish</button>
+                <hr style="margin:20px 0;border-color:#333"><h3 class="neon-text">History</h3><div id="historyList"></div>
+            `;
+            loadHistory();
+        }
+
+        function loadHistory() {
+            db.ref('tasks').orderByChild('owner').equalTo(currentUser.uid).on('value', s => {
+                let html = '';
+                const arr = [];
+                s.forEach(c => arr.push(c.val()));
+                arr.reverse().forEach(t => {
+                    const init = Number(t.initialTarget || t.remaining);
+                    const rem = Number(t.remaining);
+                    const done = init - rem;
+                    const isDone = rem <= 0;
+                    html += `
+                    <div class="history-card">
+                        <span class="status-badge ${isDone?'status-completed':'status-running'}">${isDone?'DONE':'ACTIVE'}</span>
+                        <span class="progress-text">Views: ${done}/${init}</span>
+                        <div style="margin-top:5px;color:#00d4ff;overflow:hidden;text-overflow:ellipsis"><i class="fas fa-link"></i> ${t.url}</div>
+                    </div>`;
+                });
+                document.getElementById('historyList').innerHTML = html || '<p style="text-align:center">No ads yet.</p>';
+            });
+        }
+
+        function calcCost() {
+            const t = document.getElementById('adTime').value, v = document.getElementById('adTarget').value;
+            document.getElementById('costDisplay').innerText = `Cost: ${(t/10 * v).toFixed(2)}`;
+        }
+
+        function postAd() {
+            const url = document.getElementById('adUrl').value, time = document.getElementById('adTime').value;
+            const target = document.getElementById('adTarget').value, type = document.getElementById('adType').value;
+            const cost = (time/10) * target;
+            
+            if(!url || !target) return Swal.fire('Error', 'Missing fields', 'error');
+
+            db.ref('users/' + currentUser.uid).once('value', s => {
+                const bal = Number(s.val().balance || 0);
+                if(bal >= cost) {
+                    db.ref('users/' + currentUser.uid + '/balance').set(bal - cost);
+                    db.ref('tasks').push({
+                        owner: currentUser.uid, url, duration: time, remaining: target, initialTarget: target, type
+                    });
+                    Swal.fire('Success', 'Ad Published!', 'success');
+                } else Swal.fire('Error', 'Low Balance', 'error');
+            });
+        }
+
+        // --- EXTRAS ---
+        function claimDailyBonus() {
+             const now = Date.now();
+             db.ref('users/' + currentUser.uid).once('value', s => {
+                 if(now - (s.val().lastBonus||0) > 86400000) { 
+                     db.ref('users/'+currentUser.uid+'/balance').set(Number(s.val().balance||0) + 5);
+                     db.ref('users/'+currentUser.uid+'/lastBonus').set(now);
+                     Swal.fire('Success', '+5 Coins!', 'success');
+                 } else Swal.fire('Wait', 'Already claimed today', 'info');
+             });
+        }
+
+        function loadSendMoney(c) {
+            c.innerHTML = `<h3>Send Money</h3><input id="rx" placeholder="Email" class="input-full"><input id="am" placeholder="Amount" class="input-full"><button onclick="send()" class="btn-primary">Send</button>`;
+        }
+        function send() {
+            const rx = document.getElementById('rx').value, am = Number(document.getElementById('am').value);
+            db.ref('users/' + currentUser.uid).once('value', s => {
+                if(Number(s.val().balance||0) >= am) {
+                    db.ref('users').orderByChild('email').equalTo(rx).once('value', r => {
+                        if(r.exists()) {
+                            const k = Object.keys(r.val())[0];
+                            db.ref('users/'+currentUser.uid+'/balance').set(Number(s.val().balance) - am);
+                            db.ref('users/'+k+'/balance').set(Number(r.val()[k].balance) + am);
+                            Swal.fire('Success', 'Sent!', 'success');
+                        } else Swal.fire('Error', 'User not found', 'error');
+                    });
+                } else Swal.fire('Error', 'Low Balance', 'error');
+            });
+        }
+    </script>
+</body>
+</html>
