@@ -180,22 +180,16 @@
                 snap.forEach(child => {
                     const t = child.val();
                     const rem = Number(t.remaining);
-                    const taskId = child.key;
-                    
-                    //       
-                    const viewedBy = t.viewedBy || {}; 
-                    const alreadySeen = viewedBy.hasOwnProperty(currentUser.uid);
-
-                    if(rem > 0 && t.owner !== currentUser.uid && (t.type || 'Direct Link') === cat && !alreadySeen) {
+                    if(rem > 0 && t.owner !== currentUser.uid && (t.type || 'Direct Link') === cat) {
                         const rew = Number(t.duration) / 10;
                         html += `
                         <div class="task-card">
                             <div><h4 style="margin:0;color:#00d4ff">TASK</h4><small>${t.duration}s | Pay: ${rew}</small></div>
-                            <button onclick="startTask('${taskId}', '${t.url}', ${t.duration}, ${rew})" class="btn-primary" style="width:auto;padding:5px 15px">View</button>
+                            <button onclick="startTask('${child.key}', '${t.url}', ${t.duration}, ${rew})" class="btn-primary" style="width:auto;padding:5px 15px">View</button>
                         </div>`;
                     }
                 });
-                list.innerHTML = html || '<p style="text-align:center;color:red">No new tasks available.</p>';
+                list.innerHTML = html || '<p style="text-align:center;color:red">No tasks available.</p>';
             });
         }
 
@@ -239,11 +233,8 @@
                 const newBal = currentBal + parseFloat(reward);
 
                 userRef.update({ balance: newBal }).then(() => {
-                    const taskRef = db.ref('tasks/' + taskId);
-                    taskRef.child('remaining').transaction(rem => (rem > 0 ? rem - 1 : 0));
-                    
-                    //      
-                    taskRef.child('viewedBy').child(currentUser.uid).set(true);
+                    const taskRef = db.ref('tasks/' + taskId + '/remaining');
+                    taskRef.transaction(rem => (rem > 0 ? rem - 1 : 0));
                     
                     Swal.fire({
                         icon: 'success',
